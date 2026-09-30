@@ -1,6 +1,14 @@
-<div class="container py-5">
-  <h1>Cadastro de Currículos</h1>
-  <button class="btn btn-primary">Botão principal</button>
-  <input class="form-control mt-3" placeholder="Campo normal">
-  <input class="form-control campo-pdf mt-3" value="Campo preenchido pelo PDF">
-</div>
+<nav class="navbar navbar-expand bg-primary" data-bs-theme="dark">
+  <div class="container">
+    <a class="navbar-brand fw-semibold" routerLink="/">Cadastro de Currículos</a>
+    <div class="navbar-nav">
+      <a class="nav-link" routerLink="/candidatos/novo" routerLinkActive="active">Cadastrar</a>
+      <a class="nav-link" routerLink="/candidatos" routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }">Candidatos</a>
+    </div>
+  </div>
+</nav>
+
+<main class="container py-4">
+  <router-outlet />
+</main>
