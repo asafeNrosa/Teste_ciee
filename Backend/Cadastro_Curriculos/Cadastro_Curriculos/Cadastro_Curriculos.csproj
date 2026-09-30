@@ -21,8 +21,4 @@
     <PackageReference Include="PdfPig" Version="0.1.16" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
 </Project>

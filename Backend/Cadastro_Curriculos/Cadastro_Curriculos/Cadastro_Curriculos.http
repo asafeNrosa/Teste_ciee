@@ -1,6 +1,33 @@
-@Cadastro_Curriculos_HostAddress = http://localhost:5006
+@baseUrl = http://localhost:5006
 
-GET {{Cadastro_Curriculos_HostAddress}}/weatherforecast/
-Accept: application/json
+### Listar candidatos
+GET {{baseUrl}}/api/candidatos
 
-###
+### Cadastrar válido (esperado: 201)
+POST {{baseUrl}}/api/candidatos
+Content-Type: application/json
+
+{
+  "nomeCompleto": "Maria da Silva",
+  "email": "maria.silva@exemplo.com",
+  "telefone": "(41) 99999-0000",
+  "areaInteresse": "Desenvolvimento Backend",
+  "resumoProfissional": "Desenvolvedora com experiência em .NET."
+}
+
+### Repetir o cadastro acima (esperado: 409)
+
+### Cadastro inválido (esperado: 400)
+POST {{baseUrl}}/api/candidatos
+Content-Type: application/json
+
+{
+  "nomeCompleto": "   ",
+  "email": "email-invalido"
+}
+
+### Detalhes (esperado: 200)
+GET {{baseUrl}}/api/candidatos/1
+
+### Id inexistente (esperado: 404)
+GET {{baseUrl}}/api/candidatos/9999
