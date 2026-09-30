@@ -1,1 +1,96 @@
-<p>candidato-form works!</p>
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-2">
+      <h1 class="h3 mb-0">Cadastrar currículo</h1>
+
+      <input #seletorPdf type="file" accept="application/pdf,.pdf" class="d-none"
+             (change)="aoSelecionarArquivo($event)">
+      <button type="button" class="btn btn-primary"
+              (click)="seletorPdf.click()" [disabled]="lendoPdf() || salvando()">
+        @if (lendoPdf()) {
+          <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Lendo PDF...
+        } @else {
+          Carregar PDF
+        }
+      </button>
+    </div>
+
+    <p class="text-body-secondary small mb-3">
+      Opcional: envie um currículo em PDF (até 5 MB) para preencher nome, e-mail e telefone automaticamente.
+    </p>
+
+    @if (nomeArquivo()) {
+      <p class="small mb-2">Arquivo: <strong>{{ nomeArquivo() }}</strong></p>
+    }
+    @if (mensagemPdf(); as msg) {
+      <div class="alert alert-{{ msg.tipo }}" role="status">{{ msg.texto }}</div>
+    }
+
+    <form class="card shadow-sm" [formGroup]="form" (ngSubmit)="salvar()" novalidate>
+      <div class="card-body p-4">
+
+        <div class="mb-3">
+          <label for="nomeCompleto" class="form-label">Nome completo <span class="text-danger">*</span></label>
+          <input id="nomeCompleto" class="form-control" formControlName="nomeCompleto"
+                 maxlength="150" autocomplete="name"
+                 [class.is-invalid]="erroDe('nomeCompleto')"
+                 [class.campo-pdf]="camposDoPdf().has('nomeCompleto')"
+                 (input)="removerDestaque('nomeCompleto')">
+          <div class="invalid-feedback">{{ erroDe('nomeCompleto') }}</div>
+        </div>
+
+        <div class="mb-3">
+          <label for="email" class="form-label">E-mail <span class="text-danger">*</span></label>
+          <input id="email" type="email" class="form-control" formControlName="email"
+                 maxlength="254" autocomplete="email"
+                 [class.is-invalid]="erroDe('email')"
+                 [class.campo-pdf]="camposDoPdf().has('email')"
+                 (input)="removerDestaque('email')">
+          <div class="invalid-feedback">{{ erroDe('email') }}</div>
+        </div>
+
+        <div class="mb-3">
+          <label for="telefone" class="form-label">Telefone</label>
+          <input id="telefone" type="tel" class="form-control" formControlName="telefone"
+                 maxlength="20" autocomplete="tel" placeholder="(41) 99999-0000"
+                 [class.is-invalid]="erroDe('telefone')"
+                 [class.campo-pdf]="camposDoPdf().has('telefone')"
+                 (input)="removerDestaque('telefone')">
+          <div class="invalid-feedback">{{ erroDe('telefone') }}</div>
+        </div>
+
+        <div class="mb-3">
+          <label for="areaInteresse" class="form-label">Área ou cargo de interesse</label>
+          <input id="areaInteresse" class="form-control" formControlName="areaInteresse"
+                 maxlength="100" [class.is-invalid]="erroDe('areaInteresse')">
+          <div class="invalid-feedback">{{ erroDe('areaInteresse') }}</div>
+        </div>
+
+        <div class="mb-3">
+          <label for="resumoProfissional" class="form-label">Resumo profissional</label>
+          <textarea id="resumoProfissional" class="form-control" rows="5"
+                    formControlName="resumoProfissional" maxlength="2000"
+                    [class.is-invalid]="erroDe('resumoProfissional')"></textarea>
+          <div class="invalid-feedback">{{ erroDe('resumoProfissional') }}</div>
+        </div>
+
+        @if (mensagemGeral(); as msg) {
+          <div class="alert alert-{{ msg.tipo }} mb-3" role="alert">{{ msg.texto }}</div>
+        }
+
+        <div class="d-flex justify-content-end gap-2">
+          <a class="btn btn-outline-primary" routerLink="/">Cancelar</a>
+          <button type="submit" class="btn btn-primary" [disabled]="salvando() || lendoPdf()">
+            @if (salvando()) {
+              <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Salvando...
+            } @else {
+              Salvar
+            }
+          </button>
+        </div>
+
+      </div>
+    </form>
+  </div>
+</div>
