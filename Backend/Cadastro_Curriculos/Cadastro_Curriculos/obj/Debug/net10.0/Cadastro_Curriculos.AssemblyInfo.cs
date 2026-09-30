@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Cadastro_Curriculos")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+af9c9084bcdb69df310d6218a2d9fe26c7fa8545")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+622863d3fc949f53b0309e764a4801a43c12b8a7")]
 [assembly: System.Reflection.AssemblyProductAttribute("Cadastro_Curriculos")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Cadastro_Curriculos")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
