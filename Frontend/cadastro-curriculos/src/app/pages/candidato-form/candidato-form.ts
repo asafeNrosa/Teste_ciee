@@ -6,6 +6,7 @@ import { finalize } from 'rxjs';
 import { CandidatoRequest, DadosExtraidos } from '../../core/models/candidato.model';
 import { CandidatoService } from '../../core/services/candidato.service';
 import { EMAIL_REGEX, TAMANHO_MAXIMO_PDF, obrigatorio } from '../../core/validacao';
+import { mensagemDeErro } from '../../core/errors';
 
 type Campo = 'nomeCompleto' | 'email' | 'telefone' | 'areaInteresse' | 'resumoProfissional';
 
@@ -43,7 +44,7 @@ export class CandidatoForm {
   aoSelecionarArquivo(evento: Event): void {
     const input = evento.target as HTMLInputElement;
     const arquivo = input.files?.[0];
-    input.value = ''; // permite selecionar o mesmo arquivo de novo
+    input.value = '';
     if (!arquivo) return;
 
     this.nomeArquivo.set(arquivo.name);
@@ -65,7 +66,7 @@ export class CandidatoForm {
         next: dados => this.aplicarDadosExtraidos(dados),
         error: (erro: HttpErrorResponse) => this.mensagemPdf.set({
           tipo: 'danger',
-          texto: `${this.mensagemDoErro(erro, 'Não foi possível ler o PDF.')} Você pode preencher os dados manualmente.`
+          texto: `${mensagemDeErro(erro, 'Não foi possível ler o PDF.')} Você pode preencher os dados manualmente.`
         })
       });
   }
@@ -168,12 +169,7 @@ export class CandidatoForm {
       return;
     }
 
-    this.mensagemGeral.set({ tipo: 'danger', texto: this.mensagemDoErro(erro, 'Não foi possível salvar o cadastro.') });
+    this.mensagemGeral.set({ tipo: 'danger', texto: mensagemDeErro(erro, 'Não foi possível salvar o cadastro.') });
   }
 
-  private mensagemDoErro(erro: HttpErrorResponse, padrao: string): string {
-    if (erro.status === 0) return 'Não foi possível conectar à API. Verifique se o backend está em execução.';
-    if (erro.status === 413) return 'O arquivo excede o tamanho máximo permitido.';
-    return erro.error?.title ?? padrao;
-  }
 }

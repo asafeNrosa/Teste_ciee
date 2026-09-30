@@ -71,5 +71,5 @@ public class CandidatosController(AppDbContext context) : ControllerBase
         string.IsNullOrWhiteSpace(valor) ? null : valor.Trim();
 
     private static CandidatoResponse ParaResponse(Candidato c) =>
-        new(c.Id, c.NomeCompleto, c.Email, c.Telefone, c.AreaInteresse, c.ResumoProfissional, c.DataCadastro);
+        new(c.Id, c.NomeCompleto, c.Email, c.Telefone, c.AreaInteresse, c.ResumoProfissional, DateTime.SpecifyKind(c.DataCadastro, DateTimeKind.Utc));
 }
