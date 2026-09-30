@@ -1,1 +1,46 @@
-<p>candidato-detalhe works!</p>
+@if (carregando()) {
+  <div class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Carregando...</span>
+    </div>
+  </div>
+} @else if (erro()) {
+  <div class="alert alert-danger" role="alert">{{ erro() }}</div>
+  <a class="btn btn-outline-primary" routerLink="/candidatos">Voltar para a lista</a>
+} @else if (candidato(); as c) {
+  @if (cadastroSalvo) {
+    <div class="alert alert-success" role="status">Cadastro salvo com sucesso.</div>
+  }
+
+  <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+    <div>
+      <p class="text-body-secondary small mb-1">Detalhes do candidato</p>
+      <h1 class="h3 mb-0">{{ c.nomeCompleto }}</h1>
+    </div>
+    <a class="btn btn-outline-primary" routerLink="/candidatos">Voltar para a lista</a>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body p-4">
+      <dl class="row mb-0">
+        <dt class="col-sm-4">Nome completo</dt>
+        <dd class="col-sm-8">{{ c.nomeCompleto }}</dd>
+
+        <dt class="col-sm-4">E-mail</dt>
+        <dd class="col-sm-8"><a [href]="'mailto:' + c.email">{{ c.email }}</a></dd>
+
+        <dt class="col-sm-4">Telefone</dt>
+        <dd class="col-sm-8">{{ c.telefone ?? 'Não informado' }}</dd>
+
+        <dt class="col-sm-4">Área ou cargo de interesse</dt>
+        <dd class="col-sm-8">{{ c.areaInteresse ?? 'Não informado' }}</dd>
+
+        <dt class="col-sm-4">Data de cadastro</dt>
+        <dd class="col-sm-8">{{ c.dataCadastro | date: 'dd/MM/yyyy HH:mm' }}</dd>
+
+        <dt class="col-12 mt-2">Resumo profissional</dt>
+        <dd class="col-12 mb-0 texto-resumo">{{ c.resumoProfissional ?? 'Não informado' }}</dd>
+      </dl>
+    </div>
+  </div>
+}
