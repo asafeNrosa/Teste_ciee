@@ -18,12 +18,12 @@ O relato do desenvolvimento, as decisões técnicas e o uso de IA estão em [DES
 | Camada | Tecnologia | Versão |
 |---|---|---|
 | Frontend | Angular (componentes standalone, signals, zoneless) | 21.2.x |
-| Frontend | Bootstrap (customizado via Sass) | 5.3.x |
+| Frontend | Bootstrap (customizado via Sass) | 5.3.8 |
 | Backend | ASP.NET Core Web API | .NET 10 |
-| Backend | Entity Framework Core (SqlServer, Design, Tools) | 10.x |
-| Backend | UglyToad.PdfPig (leitura de PDF) | X.Y.Z |
+| Backend | Entity Framework Core (SqlServer, Design, Tools) | 10.0.12 |
+| Backend | PdfPig (leitura de PDF) | 0.1.16 |
 | Banco de dados | SQL Server Express | 2025 (17.0) |
-| Testes | xUnit | X.Y.Z |
+| Testes | xUnit / xunit.runner.visualstudio / Microsoft.NET.Test.Sdk | 2.9.3 / 3.1.4 / 17.14.1 |
 
 Ambiente usado no desenvolvimento: Windows, Visual Studio 2026 (18.10), Node.js 24.13, npm 11.6, Angular CLI 21.2.
 
@@ -47,8 +47,6 @@ Ambiente usado no desenvolvimento: Windows, Visual Studio 2026 (18.10), Node.js 
 │       └── Cadastro_Curriculos.Tests/    # Testes automatizados (xUnit)
 ├── Frontend/
 │   └── cadastro-curriculos/              # Aplicação Angular
-├── database/
-│   └── script.sql                        # Script SQL gerado a partir das migrations
 ├── exemplos/
 │   └── curriculo.pdf                     # Currículo fictício para testar a importação
 ├── DESENVOLVIMENTO.md
@@ -108,8 +106,6 @@ dotnet ef database update
 ```
 
 No Visual Studio, o equivalente é rodar `Update-Database` no Package Manager Console, com o projeto `Cadastro_Curriculos` selecionado.
-
-**Alternativa sem EF Core:** execute o arquivo `database/script.sql` no SQL Server Management Studio, num banco criado com o nome `CadastroCurriculos`.
 
 A estrutura criada é uma tabela `Candidatos`, com índice único no e-mail e data de cadastro preenchida pelo banco, em UTC.
 
