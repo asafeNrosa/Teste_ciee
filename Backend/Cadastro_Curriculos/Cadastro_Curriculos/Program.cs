@@ -21,6 +21,16 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddSingleton<CurriculoExtrator>();
+builder.Services.AddSingleton<LeitorPdf>();
+
+const string PoliticaFrontend = "Frontend";
+
+builder.Services.AddCors(options =>
+    options.AddPolicy(PoliticaFrontend, policy =>
+        policy.WithOrigins(builder.Configuration.GetSection("Cors:Origens").Get<string[]>()
+                           ?? ["http://localhost:4200"])
+              .AllowAnyHeader()
+              .AllowAnyMethod()));
 
 var app = builder.Build();
 
@@ -32,7 +42,10 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+app.UseCors(PoliticaFrontend);
+
+if (!app.Environment.IsDevelopment())
+    app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
