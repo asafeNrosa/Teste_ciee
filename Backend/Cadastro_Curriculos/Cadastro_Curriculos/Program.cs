@@ -1,6 +1,7 @@
+using Cadastro_Curriculos.Infrastructure;
+using Cadastro_Curriculos.Services;
 using CadastroCurriculos.Api.Data;
 using Microsoft.EntityFrameworkCore;
-using Cadastro_Curriculos.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddSingleton<CurriculoExtrator>();
 
 var app = builder.Build();
 
