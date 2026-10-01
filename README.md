@@ -5,7 +5,7 @@ Aplicação para a equipe de recrutamento cadastrar e consultar candidatos, dese
 O cadastro pode ser feito de duas formas, pelo **mesmo formulário e com as mesmas regras de validação**:
 
 - **Manual:** a pessoa preenche os dados e salva.
-- **Com PDF:** a pessoa envia um currículo (opcional, até 5 MB), o backend extrai o texto e tenta identificar **nome, e-mail e telefone**. Os dados encontrados preenchem o formulário e podem ser corrigidos antes de salvar.
+- **Com PDF:** a pessoa envia um currículo (opcional, até 5 MB), o backend extrai o texto e tenta identificar **nome, e-mail, telefone, área de interesse e resumo profissional**. Os dados encontrados preenchem o formulário e podem ser corrigidos antes de salvar.
 
 Depois de salvo, o candidato aparece na listagem, com acesso a uma tela de detalhes.
 
@@ -149,7 +149,7 @@ dotnet test
 
 Os testes automatizados cobrem:
 
-- **CurriculoExtratorTests:** identificação de nome, e-mail e telefone, incluindo casos de confusão (título antes do nome, linhas de contato, CPF parecido com telefone).
+- **CurriculoExtratorTests:** identificação de nome, e-mail, telefone, área de interesse e resumo, incluindo casos de confusão (título de seção antes do nome, linhas de contato, CPF parecido com telefone) e o corte do resumo no limite de 2000 caracteres.
 - **CandidatoRequestValidacaoTests:** campos obrigatórios, tamanho máximo e formato do e-mail, conferindo as mensagens.
 - **LeitorPdfTests:** validação do arquivo (ausente, vazio, acima de 5 MB, extensão errada, arquivo renomeado) e tratamento de PDF corrompido.
 
@@ -196,7 +196,9 @@ As mesmas regras são aplicadas no frontend, para resposta imediata, e no backen
 - O nome é identificado por heurística: se um cargo aparecer na primeira linha do currículo, pode ser confundido com o nome.
 - Havendo mais de um e-mail ou telefone, só o primeiro é capturado.
 - Telefones fora do padrão brasileiro não são reconhecidos.
+- Área de interesse e resumo dependem de títulos de seção conhecidos, como "Objetivo", "Cargo pretendido", "Resumo profissional", "Perfil" ou "Sobre mim". Seções com outros nomes não são reconhecidas.
+- O resumo vai até o próximo título conhecido; se a seção seguinte tiver um título fora da lista, parte dela pode ser incluída no resumo.
+- Currículos em duas colunas podem ter o texto misturado na leitura do PDF.
 - PDFs escaneados (imagem) não são lidos, porque não há OCR.
-- Área de interesse e resumo não são extraídos do PDF.
 
 Em todos os casos, o formulário permite completar ou corrigir os dados antes de salvar. Detalhes e melhorias planejadas estão no [DESENVOLVIMENTO.md](DESENVOLVIMENTO.md).

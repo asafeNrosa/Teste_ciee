@@ -7,6 +7,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      -'Backend/**'
+      -github/workflows/main_cadastro-curriculos-api.yml
   workflow_dispatch:
 
 jobs:
@@ -23,11 +26,11 @@ jobs:
         with:
           dotnet-version: '10.x'
 
-      - name: Build with dotnet
-        run: dotnet build --configuration Release
+      - name: Rodar os testes
+        run: dotnet test Backend/Cadastro_Curriculos --configuration Release
 
-      - name: dotnet publish
-        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+      - name: Publicar a API
+        run: dotnet publish Backend/Cadastro_Curriculos/Cadastro_Curriculos/Cadastro_Curriculos.csproj -c Release -o "${{env.DOTNET_ROOT}}/myapp"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
