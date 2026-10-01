@@ -10,10 +10,12 @@ Priorizei uma entrega funcional e completa, como o próprio desafio sugere. O pl
 
 1. **Backend completo e testado primeiro:** modelagem do banco, API de candidatos, extração de dados do PDF e testes automatizados.
 2. **Depois, frontend, integração e documentação:** wireframe, telas em Angular, ajustes de integração, README e este relato.
+3. **Depois, um extra:** com a entrega principal pronta, implementei a extração de área de interesse e resumo profissional a partir do PDF, que vai além do que o desafio pede.
+4. **Por último, a publicação no Azure:** banco, API e frontend publicados, com deploy automático pelo GitHub Actions.
 
 Cada etapa terminava com testes manuais e um commit, para que o histórico mostrasse a evolução do trabalho. Durante o desenvolvimento, mantive anotações das etapas, que depois comparei com o que foi executado para montar este documento.
 
-Ferramentas: Visual Studio 2026 (backend), VS Code (frontend), SQL Server Management Studio, Git e GitHub, arquivo `.http` do Visual Studio e `curl` para testar a API.
+Ferramentas: Visual Studio 2026 (backend), VS Code (frontend), SQL Server Management Studio, Git e GitHub, arquivo `.http` do Visual Studio e `curl` para testar a API, portal do Azure e GitHub Actions para a publicação.
 
 ---
 
@@ -37,7 +39,9 @@ Ferramentas: Visual Studio 2026 (backend), VS Code (frontend), SQL Server Manage
 - **E-mail duplicado tratado pela violação do índice**, sem consulta prévia, para evitar condição de corrida entre requisições simultâneas.
 - **Leitura e extração separadas.** O `LeitorPdf` cuida do arquivo, e o `CurriculoExtrator` cuida do texto. Assim o extrator é testado apenas com strings, sem precisar de PDFs.
 - **Validação do arquivo em camadas:** presença, tamanho até 5 MB, extensão e assinatura `%PDF-` nos primeiros bytes. A assinatura impede que um arquivo renomeado seja aceito.
-- **Extração:** e-mail e telefone por expressões regulares. O nome é identificado por heurística: a primeira linha, entre as dez primeiras, só com letras e com pelo menos duas palavras, ignorando títulos como "Currículo".
+- **Extração de nome, e-mail e telefone:** e-mail e telefone por expressões regulares. O nome é identificado por heurística: a primeira linha, entre as dez primeiras, só com letras e com pelo menos duas palavras, ignorando títulos como "Currículo" e títulos de seção como "Dados Pessoais".
+- **Extração de área de interesse e resumo por títulos de seção:** o extrator reconhece títulos conhecidos, comparando o texto sem acentos e em minúsculas. A área vem do texto depois de títulos como "Objetivo" ou "Cargo pretendido" (na mesma linha, após os dois-pontos, ou na linha seguinte). O resumo reúne as linhas depois de títulos como "Resumo profissional", "Perfil" ou "Sobre mim", até o próximo título conhecido. Os dois respeitam os limites do banco (100 e 2000 caracteres), cortando entre palavras.
+- **Heurística em vez de IA para esse extra.** Comparei quatro caminhos: heurística, IA via API, uma solução híbrida e IA rodando localmente. Escolhi a heurística porque não exige chave de API nem configuração para quem avalia, não envia dados pessoais de candidatos a terceiros e pode ser testada de forma determinística. A IA ficou registrada como melhoria.
 - **O endpoint de extração não salva nada.** Os dois caminhos de cadastro terminam no mesmo `POST /api/candidatos`, com as mesmas validações.
 - **Configuração sem credenciais no repositório:** connection string no User Secrets, com autenticação do Windows, e um `appsettings.example.json` como modelo.
 - **Redirecionamento HTTPS apenas fora do ambiente de desenvolvimento**, porque o navegador não aceita redirecionamentos na verificação de CORS (preflight), o que quebraria o upload pelo frontend.
@@ -46,12 +50,21 @@ Ferramentas: Visual Studio 2026 (backend), VS Code (frontend), SQL Server Manage
 
 - **Wireframe próprio como base**, com ajustes antes de codar: rótulos acima dos campos (o placeholder desapareceria quando o PDF preenchesse o formulário), botões Salvar e Cancelar, área de mensagens, dados da tela de detalhes como texto e um cabeçalho de navegação.
 - **Bootstrap customizado via Sass**, com uma paleta de cores vivas e contraste adequado para leitura. Campos preenchidos pelo PDF ficam destacados em ciano, para o usuário saber o que conferir.
-- **Um único formulário (Reactive Forms) para os dois caminhos.** O PDF apenas preenche os campos encontrados, que podem ser corrigidos antes de salvar.
+- **Um único formulário (Reactive Forms) para os dois caminhos.** O PDF apenas preenche os campos encontrados (nome, e-mail, telefone, área e resumo), que podem ser corrigidos antes de salvar.
 - **Mesmas regras de validação do backend:** a mesma expressão regular de e-mail e um validador de obrigatório que, como o `[Required]` do .NET, recusa textos só com espaços.
 - **O PDF nunca bloqueia o cadastro manual.** Arquivo inválido, falha de leitura ou API indisponível geram apenas uma mensagem.
 - **Erros da API ligados aos campos:** o 409 aparece no campo e-mail, e os erros de validação do backend (400) aparecem em cada campo correspondente.
 - **Estado das telas em signals**, necessário no Angular 21, que funciona sem Zone.js por padrão.
 - **Todas as chamadas HTTP num único serviço** (`CandidatoService`) e o tratamento de mensagens de erro numa função compartilhada.
+
+### Publicação no Azure
+
+- **Arquitetura:** frontend no Azure Static Web Apps (plano Free), API no Azure App Service (Windows, .NET 10) e banco no Azure SQL Database (edição Básica).
+- **Recursos reaproveitados:** o servidor SQL e o plano do App Service de um projeto anterior, o que evitou custo adicional na conta Azure for Students.
+- **Banco copiado com o assistente do SSMS**, levando a estrutura e a tabela de histórico das migrations.
+- **Nenhuma credencial no repositório:** a connection string fica nas "Cadeias de conexão" do App Service, que o ASP.NET Core lê como `ConnectionStrings:DefaultConnection` sem nenhuma mudança no código. A origem do frontend é liberada no CORS pela configuração `Cors__Origens__0`.
+- **Deploy contínuo:** a API é publicada pelo GitHub Actions a cada push que altera o backend. O workflow roda todos os testes antes, e um teste quebrado impede o deploy. O frontend é publicado pelo workflow do Static Web Apps.
+- **Ajustes no frontend:** `environment.ts` de produção apontando para a API publicada; `staticwebapp.config.json` redirecionando as rotas do Angular para o `index.html`, para que links diretos e o recarregamento das páginas funcionem; versão mínima do Node declarada no `package.json` para a compilação no Azure.
 
 ---
 
@@ -63,7 +76,7 @@ Utilizei apenas o **Claude (Anthropic), modelo Claude Opus 5.5**, pela interface
 
 ## 4. Como a IA participou
 
-A IA funcionou como uma **assistente**, e não como uma desenvolvedora que entrega o projeto pronto. Eu usei o Claude para tirar dúvidas, entender conceitos e receber ajuda na implementação. As decisões, a execução e os testes foram conduzidos por mim, etapa por etapa.
+**Todas as ações e decisões sobre o código foram tomadas por mim**, seguindo boas práticas de desenvolvimento e com o auxílio do Claude. A IA funcionou como uma **assistente**, e não como uma desenvolvedora que entrega o projeto pronto: eu a usei para tirar dúvidas, entender conceitos, comparar alternativas e receber ajuda na implementação. Em cada etapa, avaliei as propostas, escolhi o caminho, executei, revisei o código e conduzi os testes.
 
 Exemplos de pedidos e de como as respostas foram aproveitadas:
 
@@ -75,7 +88,9 @@ Exemplos de pedidos e de como as respostas foram aproveitadas:
 | Usar try/catch sempre que possível | Discutimos e adotei try/catch pontual com um tratador global. |
 | Diagnóstico de erros colados do terminal (git, curl, redirecionamento 307) | Identifiquei as causas e apliquei as correções. |
 | Revisão do meu wireframe, com cores vivas e de fácil leitura | Aceitei os ajustes de usabilidade e a paleta proposta. |
-| Qual a complexidade de extrair área de interesse e resumo do PDF | Comparei as opções e decidi priorizar a entrega completa, deixando isso como melhoria. |
+| Qual a complexidade de extrair área de interesse e resumo do PDF | Primeiro priorizei a entrega completa. Depois, comparei as opções em detalhe (comportamento com diferentes currículos, critérios do desafio, tempo) e escolhi a heurística por títulos de seção. |
+| Como publicar a aplicação no Azure | Segui o caminho que já tinha usado em outro projeto, reaproveitando o servidor SQL e o plano do App Service, e optei pelo deploy da API via GitHub Actions, com os testes rodando antes. |
+| Diagnóstico do erro de conexão do frontend publicado | Pela aba Rede do navegador, identifiquei a falta do cabeçalho de CORS e o nome da configuração que não batia com o código. |
 | Geração de código (entidade, DbContext, DTOs, controllers, serviços, testes, telas) | Revisei, adaptei ao meu projeto e compilei cada parte, pedindo a explicação de cada trecho. |
 
 ---
@@ -98,7 +113,17 @@ Exemplos de pedidos e de como as respostas foram aproveitadas:
 - A data de cadastro aparecia 3 horas adiantada, porque o valor UTC chegava ao frontend sem indicação de fuso. Corrigi no backend com `DateTime.SpecifyKind`.
 - Um push foi rejeitado porque eu tinha editado um arquivo direto no GitHub. Resolvi com `git pull --rebase`, sem push forçado.
 
-**Descartado:** a tabela por campo, o try/catch em todos os métodos e a extração de área e resumo neste momento.
+**Problemas resolvidos na publicação:**
+
+- O endereço da API não era o nome que escolhi: o App Service acrescenta um código único e a região ao domínio padrão. Passei a usar o domínio indicado no portal.
+- O firewall do Azure SQL bloqueou o meu IP na cópia do banco; liberei o acesso pelo portal.
+- A primeira execução do workflow gerado pelo Azure falhou, porque tentava compilar a raiz do repositório. Ajustei para apontar para o projeto da API e para rodar os testes antes do deploy.
+- O banco foi copiado depois da limpeza dos dados de teste e chegou vazio ao Azure. O primeiro cadastro foi feito pelo próprio site publicado, servindo de teste final do fluxo completo.
+- O frontend publicado não conseguia acessar a API. Pela aba Rede do navegador, vi que a API respondia 200, mas sem o cabeçalho `Access-Control-Allow-Origin`: a variável de ambiente estava como `Cors__Origins__0`, e o código lê `Cors:Origens`. Corrigi o nome.
+- O build de produção do Angular avisou que o pacote inicial passava do orçamento de 500 kB, por causa do Bootstrap completo (227 kB de CSS). Como o tráfego real, comprimido, é de cerca de 106 kB, tratei o aviso como aceitável.
+- Corrigi a grafia de um nome cadastrado direto no Azure SQL, com um `UPDATE` dentro de uma transação, já que a aplicação ainda não tem tela de edição.
+
+**Descartado:** a tabela por campo, o try/catch em todos os métodos e, por enquanto, o uso de IA para a extração.
 
 ---
 
@@ -106,13 +131,16 @@ Exemplos de pedidos e de como as respostas foram aproveitadas:
 
 - **Revisão do que foi gerado:** conferi a migration antes de aplicá-la e a estrutura criada no SQL Server Management Studio (tabela, índice único e valor padrão).
 - **Testes automatizados (xUnit)**, todos aprovados:
-  - `CurriculoExtratorTests`: extração com texto completo, texto vazio, ausência de telefone, título antes do nome, linhas de contato, e-mail em maiúsculas, cinco formatos de telefone e CPF que não pode ser confundido com telefone.
+  - `CurriculoExtratorTests`: extração com texto completo, texto vazio, ausência de telefone, título antes do nome, linhas de contato, e-mail em maiúsculas, cinco formatos de telefone, CPF que não pode ser confundido com telefone, área na mesma linha e na linha seguinte (com título em maiúsculas e acentuado), resumo em várias linhas parando no próximo título, currículo sem títulos de seção, resumo acima de 2000 caracteres e título de seção antes do nome.
   - `CandidatoRequestValidacaoTests`: campos obrigatórios, tamanho máximo e formatos inválidos de e-mail, conferindo o texto das mensagens.
   - `LeitorPdfTests`: arquivo ausente, vazio, acima de 5 MB, com extensão errada, renomeado para `.pdf`, válido e corrompido.
 - **Testes manuais da API** com o arquivo `.http` e o `curl`: cadastro (201), e-mail duplicado (409), dados inválidos (400), detalhes (200), id inexistente (404), banco desligado (503) e uploads com PDF válido, arquivo falso, requisição sem arquivo e PDF escaneado.
 - **Testes manuais do frontend**, com backend e frontend rodando juntos:
-  - Formulário: salvar vazio, e-mail inválido, nome só com espaços, cadastro válido, e-mail duplicado, importação do currículo fictício, arquivo falso, imagem e API desligada.
+  - Formulário: salvar vazio, e-mail inválido, nome só com espaços, cadastro válido, e-mail duplicado, importação do currículo fictício (os cinco campos preenchidos), currículo sem as seções de área e resumo (aviso dos campos não encontrados), arquivo falso, imagem e API desligada.
   - Lista e detalhes: hora de cadastro correta, navegação para os detalhes, aviso de cadastro salvo, id inexistente, id inválido, API desligada e resumo com várias linhas.
+
+- **Testes em produção (Azure):** lista da API pelo navegador, extração com `curl` no endereço publicado, cadastro completo pelo site a partir do PDF e hora de cadastro correta na lista.
+- **Integração contínua:** a cada push no backend, o GitHub Actions roda todos os testes automatizados antes do deploy.
 
 Os testes automatizados ficaram concentrados no backend, onde está a lógica de extração e de validação. O frontend foi verificado manualmente.
 
@@ -120,7 +148,7 @@ Os testes automatizados ficaram concentrados no backend, onde está a lógica de
 
 ## 7. Tempo dedicado
 
-Aproximadamente **12 horas**: cerca de **8 horas no backend** e **4 horas no frontend**.
+Aproximadamente **16 horas**: cerca de **8 horas no backend**, **4 horas no frontend** e **4 horas** na extração de área e resumo e na publicação no Azure.
 
 ---
 
@@ -135,15 +163,18 @@ As maiores dificuldades não estiveram nas tomadas de decisão, mas em **executa
 - O nome é identificado por heurística: se um cargo aparecer na primeira linha do currículo, pode ser confundido com o nome.
 - Havendo mais de um e-mail ou telefone, só o primeiro é capturado.
 - Telefones fora do padrão brasileiro não são reconhecidos.
+- Área de interesse e resumo dependem de títulos de seção conhecidos; seções com outros nomes não são reconhecidas.
+- O resumo vai até o próximo título conhecido; se a seção seguinte tiver um título fora da lista, parte dela pode entrar no resumo.
+- Currículos em duas colunas podem ter o texto misturado na leitura do PDF.
 - PDFs escaneados (imagem) não são lidos, porque não há OCR.
-- Área de interesse e resumo não são preenchidos a partir do PDF.
+- A aplicação publicada não tem autenticação: qualquer pessoa com o link pode consultar e cadastrar candidatos.
 - Não há testes automatizados no frontend.
 
 Em todos os casos, o formulário permite completar ou corrigir os dados antes de salvar.
 
 ### Melhorias que faria com mais tempo
 
-- **Preencher área de interesse e resumo profissional com IA**, enviando o texto do currículo a um modelo de linguagem que devolva os campos estruturados. Seria preciso tratar custo, disponibilidade do serviço e, principalmente, o envio de dados pessoais a terceiros, de acordo com a LGPD.
+- **Extração híbrida com IA:** manter a heurística como padrão e, quando houver uma chave configurada, enviar o texto do currículo a um modelo de linguagem que devolva os campos estruturados, voltando à heurística em caso de falha. Isso melhoraria currículos sem títulos ou em duas colunas, mas exige tratar custo, disponibilidade do serviço e, principalmente, o envio de dados pessoais a terceiros, de acordo com a LGPD.
 - **Login de administrador**, com acesso à lista e aos detalhes restrito a ele. O candidato continuaria podendo se cadastrar sem login; fazendo login, poderia editar o próprio cadastro.
 - **Exclusão de cadastros** pelo administrador.
 - **Impressão do cadastro** a partir da tela de detalhes.
@@ -151,3 +182,5 @@ Em todos os casos, o formulário permite completar ou corrigir os dados antes de
 - **OCR** para ler currículos escaneados.
 - **Paginação e busca** na listagem.
 - **Testes de integração** da API com banco de teste e **testes de componente** no frontend.
+- **CSS menor**, importando apenas os componentes do Bootstrap que são usados.
+- **Ajustes no CI/CD:** filtro de pastas também no workflow do frontend e atualização das actions do GitHub para as versões compatíveis com o Node.js 24.

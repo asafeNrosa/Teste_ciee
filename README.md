@@ -32,6 +32,7 @@ Ambiente usado no desenvolvimento: Windows, Visual Studio 2026 (18.10), Node.js 
 ## Estrutura do repositório
 
 ```
+├── .github/workflows/                    # Deploy da API e do frontend no Azure (GitHub Actions)
 ├── Backend/
 │   └── Cadastro_Curriculos/
 │       ├── Cadastro_Curriculos/          # API ASP.NET Core
@@ -134,7 +135,7 @@ ng serve
 
 Acesse `http://localhost:4200`.
 
-Se a API rodar em outra porta, ajuste `apiUrl` em `Frontend/cadastro-curriculos/src/environments/environment.development.ts`. Se o frontend rodar em outra origem, acrescente-a em `Cors:Origens` no `appsettings` da API.
+Se a API rodar em outra porta, ajuste `apiUrl` em `Frontend/cadastro-curriculos/src/environments/environment.development.ts`, que é o arquivo usado pelo `ng serve`. O `environment.ts` contém o endereço da API publicada e é usado no build de produção. Se o frontend rodar em outra origem, acrescente-a em `Cors:Origens` no `appsettings` da API.
 
 Para testar a importação, use o currículo fictício em `exemplos/curriculo.pdf`.
 
@@ -160,6 +161,22 @@ curl -i -F "arquivo=@exemplos/curriculo.pdf" http://localhost:5006/api/curriculo
 ```
 
 No PowerShell, use `curl.exe` em vez de `curl`.
+
+---
+
+## Publicação (Azure)
+
+A aplicação também está publicada no Azure:
+
+| Parte | Serviço |
+|---|---|
+| Frontend | Azure Static Web Apps |
+| API | Azure App Service (Windows, .NET 10) |
+| Banco | Azure SQL Database |
+
+- **Deploy contínuo:** a cada push na branch `main`, o GitHub Actions publica o frontend e, quando há mudanças no backend, roda todos os testes antes de publicar a API. Um teste quebrado impede o deploy.
+- **Configuração sem credenciais no repositório:** em produção, a connection string fica nas configurações do App Service, e a origem do frontend é liberada no CORS pela configuração `Cors__Origens__0`.
+- **Rotas do Angular:** o arquivo `public/staticwebapp.config.json` redireciona as rotas para o `index.html`, para que links diretos e o recarregamento das páginas funcionem.
 
 ---
 
@@ -200,5 +217,6 @@ As mesmas regras são aplicadas no frontend, para resposta imediata, e no backen
 - O resumo vai até o próximo título conhecido; se a seção seguinte tiver um título fora da lista, parte dela pode ser incluída no resumo.
 - Currículos em duas colunas podem ter o texto misturado na leitura do PDF.
 - PDFs escaneados (imagem) não são lidos, porque não há OCR.
+- A aplicação não tem autenticação: na versão publicada, qualquer pessoa com o link pode consultar e cadastrar candidatos.
 
 Em todos os casos, o formulário permite completar ou corrigir os dados antes de salvar. Detalhes e melhorias planejadas estão no [DESENVOLVIMENTO.md](DESENVOLVIMENTO.md).
