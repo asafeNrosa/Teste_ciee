@@ -10,7 +10,7 @@ Priorizei uma entrega funcional e completa, como o próprio desafio sugere. O pl
 
 1. **Backend completo e testado primeiro:** modelagem do banco, API de candidatos, extração de dados do PDF e testes automatizados.
 2. **Depois, frontend, integração e documentação:** wireframe, telas em Angular, ajustes de integração, README e este relato.
-3. **Depois, um extra:** com a entrega principal pronta, implementei a extração de área de interesse e resumo profissional a partir do PDF, que vai além do que o desafio pede.
+3. **Depois:** com a entrega principal quase pronta, implementei a extração de área de interesse e resumo profissional a partir do PDF.
 4. **Por último, a publicação no Azure:** banco, API e frontend publicados, com deploy automático pelo GitHub Actions.
 
 Cada etapa terminava com testes manuais e um commit, para que o histórico mostrasse a evolução do trabalho. Durante o desenvolvimento, mantive anotações das etapas, que depois comparei com o que foi executado para montar este documento.
@@ -41,7 +41,7 @@ Ferramentas: Visual Studio 2026 (backend), VS Code (frontend), SQL Server Manage
 - **Validação do arquivo em camadas:** presença, tamanho até 5 MB, extensão e assinatura `%PDF-` nos primeiros bytes. A assinatura impede que um arquivo renomeado seja aceito.
 - **Extração de nome, e-mail e telefone:** e-mail e telefone por expressões regulares. O nome é identificado por heurística: a primeira linha, entre as dez primeiras, só com letras e com pelo menos duas palavras, ignorando títulos como "Currículo" e títulos de seção como "Dados Pessoais".
 - **Extração de área de interesse e resumo por títulos de seção:** o extrator reconhece títulos conhecidos, comparando o texto sem acentos e em minúsculas. A área vem do texto depois de títulos como "Objetivo" ou "Cargo pretendido" (na mesma linha, após os dois-pontos, ou na linha seguinte). O resumo reúne as linhas depois de títulos como "Resumo profissional", "Perfil" ou "Sobre mim", até o próximo título conhecido. Os dois respeitam os limites do banco (100 e 2000 caracteres), cortando entre palavras.
-- **Heurística em vez de IA para esse extra.** Comparei quatro caminhos: heurística, IA via API, uma solução híbrida e IA rodando localmente. Escolhi a heurística porque não exige chave de API nem configuração para quem avalia, não envia dados pessoais de candidatos a terceiros e pode ser testada de forma determinística. A IA ficou registrada como melhoria.
+- **Heurística em vez de IA.** Comparei quatro caminhos: heurística, IA via API, uma solução híbrida e IA rodando localmente. Escolhi a heurística porque não exige chave de API nem configuração para quem avalia, não envia dados pessoais de candidatos a terceiros e pode ser testada de forma determinística. A IA ficou registrada como melhoria.
 - **O endpoint de extração não salva nada.** Os dois caminhos de cadastro terminam no mesmo `POST /api/candidatos`, com as mesmas validações.
 - **Configuração sem credenciais no repositório:** connection string no User Secrets, com autenticação do Windows, e um `appsettings.example.json` como modelo.
 - **Redirecionamento HTTPS apenas fora do ambiente de desenvolvimento**, porque o navegador não aceita redirecionamentos na verificação de CORS (preflight), o que quebraria o upload pelo frontend.
@@ -91,7 +91,7 @@ Exemplos de pedidos e de como as respostas foram aproveitadas:
 | Qual a complexidade de extrair área de interesse e resumo do PDF | Primeiro priorizei a entrega completa. Depois, comparei as opções em detalhe (comportamento com diferentes currículos, critérios do desafio, tempo) e escolhi a heurística por títulos de seção. |
 | Como publicar a aplicação no Azure | Segui o caminho que já tinha usado em outro projeto, reaproveitando o servidor SQL e o plano do App Service, e optei pelo deploy da API via GitHub Actions, com os testes rodando antes. |
 | Diagnóstico do erro de conexão do frontend publicado | Pela aba Rede do navegador, identifiquei a falta do cabeçalho de CORS e o nome da configuração que não batia com o código. |
-| Geração de código (entidade, DbContext, DTOs, controllers, serviços, testes, telas) | Revisei, adaptei ao meu projeto e compilei cada parte, pedindo a explicação de cada trecho. |
+| Ajuste e correção de código (entidade, DbContext, DTOs, controllers, serviços, testes, telas) | Revisei, adaptei ao meu projeto e compilei cada parte, pedindo a explicação de cada trecho. |
 
 ---
 
