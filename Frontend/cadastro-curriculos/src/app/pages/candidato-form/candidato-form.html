@@ -17,7 +17,7 @@
     </div>
 
     <p class="text-body-secondary small mb-3">
-      Opcional: envie um currículo em PDF (até 5 MB) para preencher nome, e-mail e telefone automaticamente.
+      Opcional: envie um currículo em PDF (até 5 MB) para preencher o formulário automaticamente.
     </p>
 
     @if (nomeArquivo()) {
@@ -63,7 +63,9 @@
         <div class="mb-3">
           <label for="areaInteresse" class="form-label">Área ou cargo de interesse</label>
           <input id="areaInteresse" class="form-control" formControlName="areaInteresse"
-                 maxlength="100" [class.is-invalid]="erroDe('areaInteresse')">
+                 maxlength="100" [class.is-invalid]="erroDe('areaInteresse')"
+                 [class.campo-pdf]="camposDoPdf().has('areaInteresse')"
+                 (input)="removerDestaque('areaInteresse')">
           <div class="invalid-feedback">{{ erroDe('areaInteresse') }}</div>
         </div>
 
@@ -71,7 +73,10 @@
           <label for="resumoProfissional" class="form-label">Resumo profissional</label>
           <textarea id="resumoProfissional" class="form-control" rows="5"
                     formControlName="resumoProfissional" maxlength="2000"
-                    [class.is-invalid]="erroDe('resumoProfissional')"></textarea>
+                    [class.is-invalid]="erroDe('resumoProfissional')"
+                    [class.campo-pdf]="camposDoPdf().has('resumoProfissional')"
+                    (input)="removerDestaque('resumoProfissional')">
+                    </textarea>
           <div class="invalid-feedback">{{ erroDe('resumoProfissional') }}</div>
         </div>
 

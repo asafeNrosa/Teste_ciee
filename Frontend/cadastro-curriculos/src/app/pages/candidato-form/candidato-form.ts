@@ -124,7 +124,9 @@ export class CandidatoForm {
     const campos: [Campo, string | null, string][] = [
       ['nomeCompleto', dados.nomeCompleto, 'nome'],
       ['email', dados.email, 'e-mail'],
-      ['telefone', dados.telefone, 'telefone']
+      ['telefone', dados.telefone, 'telefone'],
+      ['areaInteresse', dados.areaInteresse, 'área de interesse'],
+      ['resumoProfissional', dados.resumoProfissional, 'resumo profissional']
     ];
 
     for (const [campo, valor, rotulo] of campos) {
@@ -141,11 +143,11 @@ export class CandidatoForm {
     this.camposDoPdf.set(encontrados);
 
     if (encontrados.size === 0) {
-      this.mensagemPdf.set({ tipo: 'warning', texto: 'Não identificamos nome, e-mail nem telefone neste PDF. Preencha os dados manualmente.' });
+      this.mensagemPdf.set({ tipo: 'warning', texto: 'Não identificamos dados neste PDF. Preencha os dados manualmente.' });
     } else if (faltando.length > 0) {
       this.mensagemPdf.set({ tipo: 'warning', texto: `Dados importados do PDF. Não encontramos: ${faltando.join(', ')}. Preencha manualmente e confira os campos destacados.` });
     } else {
-      this.mensagemPdf.set({ tipo: 'success', texto: 'Nome, e-mail e telefone importados do PDF. Confira os campos destacados antes de salvar.' });
+      this.mensagemPdf.set({ tipo: 'success', texto: 'Todos os dados foram importados do PDF. Confira os campos destacados antes de salvar.' });
     }
   }
 

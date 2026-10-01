@@ -20,4 +20,6 @@ export interface DadosExtraidos {
   nomeCompleto: string | null;
   email: string | null;
   telefone: string | null;
+  areaInteresse: string | null;
+  resumoProfissional: string | null;
 }

@@ -33,6 +33,8 @@ public class CurriculoExtratorTests
         Assert.Null(resultado.NomeCompleto);
         Assert.Null(resultado.Email);
         Assert.Null(resultado.Telefone);
+        Assert.Null(resultado.AreaInteresse);
+        Assert.Null(resultado.ResumoProfissional);
     }
 
     [Fact]
@@ -104,5 +106,88 @@ public class CurriculoExtratorTests
         var resultado = _extrator.Extrair("CPF: 123.456.789-00");
 
         Assert.Null(resultado.Telefone);
+    }
+    [Fact]
+    public void Extrair_ObjetivoComConteudoNaMesmaLinha_PreencheAreaDeInteresse()
+    {
+        var texto = """
+            Maria Eduarda Ferreira
+            Objetivo: Desenvolvedora Backend
+            """;
+
+        var resultado = _extrator.Extrair(texto);
+
+        Assert.Equal("Desenvolvedora Backend", resultado.AreaInteresse);
+    }
+
+    [Fact]
+    public void Extrair_TituloDeAreaEmMaiusculasComAcento_UsaLinhaSeguinte()
+    {
+        var texto = """
+            João Pedro Souza
+            ÁREA DE INTERESSE
+            Analista de Dados
+            """;
+
+        var resultado = _extrator.Extrair(texto);
+
+        Assert.Equal("Analista de Dados", resultado.AreaInteresse);
+    }
+
+    [Fact]
+    public void Extrair_ResumoEmVariasLinhas_JuntaAteOProximoTitulo()
+    {
+        var texto = """
+            Maria Eduarda Ferreira
+            Resumo Profissional
+            Desenvolvedora backend com experiência
+            em C# e SQL Server.
+            Experiência Profissional
+            Empresa Exemplo Ltda.
+            """;
+
+        var resultado = _extrator.Extrair(texto);
+
+        Assert.Equal("Desenvolvedora backend com experiência em C# e SQL Server.", resultado.ResumoProfissional);
+    }
+
+    [Fact]
+    public void Extrair_SemTitulosDeSecao_RetornaAreaEResumoNulos()
+    {
+        var texto = """
+            Maria Eduarda Ferreira
+            maria.ferreira@exemplo.com
+            Desenvolvedora backend com experiência em C#.
+            """;
+
+        var resultado = _extrator.Extrair(texto);
+
+        Assert.Null(resultado.AreaInteresse);
+        Assert.Null(resultado.ResumoProfissional);
+    }
+
+    [Fact]
+    public void Extrair_ResumoAcimaDe2000Caracteres_CortaNoLimiteSemQuebrarPalavra()
+    {
+        var texto = "Resumo\n" + string.Join(' ', Enumerable.Repeat("palavra", 400));
+
+        var resultado = _extrator.Extrair(texto);
+
+        Assert.NotNull(resultado.ResumoProfissional);
+        Assert.True(resultado.ResumoProfissional.Length <= 2000);
+        Assert.EndsWith("palavra", resultado.ResumoProfissional);
+    }
+
+    [Fact]
+    public void Extrair_TituloDeSecaoAntesDoNome_NaoEhConsideradoNome()
+    {
+        var texto = """
+            Dados Pessoais
+            João Pedro Souza
+            """;
+
+        var resultado = _extrator.Extrair(texto);
+
+        Assert.Equal("João Pedro Souza", resultado.NomeCompleto);
     }
 }
