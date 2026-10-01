@@ -1,3 +1,3 @@
 export const environment = {
-  apiUrl: 'http://localhost:5006/api'
+  apiUrl: 'https://cadastro-curriculos-api-hcd2dcgub6bycxer.brazilsouth-01.azurewebsites.net/api'
 };
